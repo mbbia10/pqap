@@ -8,6 +8,7 @@ import {
   Dimensions,
   Pressable,
   Linking,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,21 +20,11 @@ export default function MarromScreen() {
 
   // Ícones animados
   const icons = [
-    { name: 'school', color: '#d2691e', top: 50, left: 30 },
-    { name: 'book', color: '#8b4513', top: 100, left: width - 60 },
-    { name: 'trophy', color: '#ffd700', top: 200, left: 50 },
+    { name: 'school', color: '#d2691e', top: 30, left: 20 },
+    { name: 'book', color: '#8b4513', top: 80, left: width - 60 },
+    { name: 'trophy', color: '#ffd700', top: 180, left: 50 },
     { name: 'rocket', color: '#6a5acd', top: 150, left: width / 2 },
     { name: 'code-slash', color: '#ff6f61', top: 250, left: width / 3 },
-    { name: 'analytics', color: '#ff1493', top: 300, left: width / 2 + 40 },
-    { name: 'chatbubble-ellipses', color: '#20b2aa', top: 350, left: width - 80 },
-    { name: 'globe', color: '#1e90ff', top: 400, left: width / 2 + 30 },
-    { name: 'laptop', color: '#ffa500', top: height / 2 - 100, left: 70 },
-    { name: 'desktop', color: '#7fffd4', top: 420, left: 40 },
-    { name: 'happy', color: '#ff69b4', top: height - 180, left: 30 },
-    { name: 'heart', color: '#ff1493', top: height - 160, left: width / 4 },
-    { name: 'planet', color: '#32cd32', top: height - 140, left: width / 2 - 20 },
-    { name: 'server', color: '#9400d3', top: height - 160, left: width / 2 + 50 },
-    { name: 'rocket-outline', color: '#1e90ff', top: height - 120, left: width - 60 },
   ];
 
   const iconAnims = useRef(icons.map(() => new Animated.Value(0))).current;
@@ -52,13 +43,13 @@ export default function MarromScreen() {
       Animated.loop(
         Animated.sequence([
           Animated.timing(anim, {
-            toValue: -20 + Math.random() * 10,
-            duration: 2500 + Math.random() * 1000,
+            toValue: -15 + Math.random() * 10,
+            duration: 2000 + Math.random() * 1000,
             useNativeDriver: true,
           }),
           Animated.timing(anim, {
-            toValue: 20 + Math.random() * 10,
-            duration: 2500 + Math.random() * 1000,
+            toValue: 15 + Math.random() * 10,
+            duration: 2000 + Math.random() * 1000,
             useNativeDriver: true,
           }),
         ])
@@ -68,102 +59,89 @@ export default function MarromScreen() {
 
   return (
     <LinearGradient
-      colors={['#a0522d', '#604060']} // marrom → roxo
+      colors={['#23086dff', '#3b033bff']}
       style={styles.container}
     >
       {/* Ícones animados */}
       {icons.map((icon, index) => (
         <Animated.View
           key={index}
-          style={[
-            styles.icon,
-            {
-              top: icon.top,
-              left: icon.left,
-              transform: [{ translateY: iconAnims[index] }],
-            },
-          ]}
+          style={[styles.icon, { top: icon.top, left: icon.left, transform: [{ translateY: iconAnims[index] }] }]}
         >
           <Ionicons name={icon.name} size={30} color={icon.color} />
         </Animated.View>
       ))}
 
-      {/* Caixa central */}
-      <View style={styles.textBox}>
-        <Text style={styles.text}>
-          O Programmer's Quest surgiu como um projeto educacional inovador, combinando programação e gamificação. 
-          O objetivo é ensinar conceitos de tecnologia e desenvolvimento de forma divertida e interativa, 
-          utilizando jogos, desafios e recompensas para engajar os alunos. 
-          Desde sua criação, tem inspirado estudantes a aprenderem programação e a aplicarem suas habilidades 
-          em projetos reais, estimulando criatividade e inovação.
-        </Text>
+      <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
+        {/* Texto 1 */}
+        <View style={styles.textBox}>
+          <Text style={styles.text}>
+            O projeto Programmer's Quest surgiu na ETEC Bento Quirino a partir das dificuldades que os alunos enfrentavam em programação. 
+            O objetivo era criar uma maneira divertida e interativa de aprender programação, usando jogos, desafios e recompensas.
+          </Text>
+        </View>
 
+        {/* Imagem do meio */}
+        <Image
+          source={require('../../assets/bento-quirino.jpeg')}
+          style={styles.middleImage}
+        />
+
+        {/* Texto 2 */}
+        <View style={styles.textBox}>
+          <Text style={styles.text}>
+            Os integrantes do projeto são Maria Beatriz, Kenzo e William, estudantes que adoram o curso de SDS e se dedicam a criar experiências educacionais inovadoras. 
+            Eles aplicam programação e criatividade para engajar outros alunos e estimular a inovação.
+          </Text>
+        </View>
+  <Image
+          source={require('../../assets/i3.jpeg')}
+          style={styles.middleImage}
+        />
         {/* Botão Saiba Mais */}
         <Pressable
           style={styles.button}
-          onPress={() => Linking.openURL('https://pt.wikipedia.org/wiki/Programação')} // Pode mudar para site do projeto
+          onPress={() => Linking.openURL('https://www.instagram.com/programmersquest/')}
         >
           <Text style={styles.buttonText}>Saiba Mais</Text>
         </Pressable>
-      </View>
 
-      {/* Mago flutuante */}
-      <Animated.Image
-        source={require('../../assets/wizard.png')}
-        style={[styles.wizard, { transform: [{ translateY: floatAnim }] }]}
-      />
+        {/* Mago flutuante */}
+        <Animated.Image
+          source={require('../../assets/wizard.png')}
+          style={[styles.wizard, { transform: [{ translateY: floatAnim }] }]}
+        />
+      </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
+  container: { flex: 1, paddingTop: 50 },
   textBox: {
-    backgroundColor: 'rgba(255, 241, 214, 0.9)',
-    padding: 25,
-    borderRadius: 30,
+    backgroundColor: 'rgba(255, 241, 214, 0.95)',
+    padding: 20,
+    borderRadius: 20,
+    marginVertical: 10,
+    width: '90%',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 10,
-    elevation: 8,
-    marginVertical: 20,
-    width: '90%',
-    zIndex: 1,
-    alignItems: 'center',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 5,
   },
-  text: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'justify',
-    lineHeight: 22,
-  },
+  text: { fontSize: 16, color: '#333', textAlign: 'justify', lineHeight: 22 },
+  middleImage: { width: '90%', height: 180, resizeMode: 'cover', marginVertical: 15, borderRadius: 15 },
   button: {
     marginTop: 15,
     backgroundColor: '#6a5acd',
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 25,
+    marginBottom: 30,
   },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  wizard: {
-    width: 160,
-    height: 160,
-    resizeMode: 'contain',
-    marginTop: 20,
-    zIndex: 2,
-  },
-  icon: {
-    position: 'absolute',
-    zIndex: 0,
-  },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  wizard: { width: 160, height: 160, resizeMode: 'contain', marginTop: 20 },
+  icon: { position: 'absolute', zIndex: 0 },
 });
