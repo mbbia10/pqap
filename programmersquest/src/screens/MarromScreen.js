@@ -94,10 +94,45 @@ export default function MarromScreen() {
             Eles aplicam programação e criatividade para engajar outros alunos e estimular a inovação.
           </Text>
         </View>
-  <Image
+
+        <Image
           source={require('../../assets/i3.jpeg')}
           style={styles.middleImage}
         />
+
+        {/* Seção Como Jogar */}
+        <Text style={styles.sectionTitle}>Como Jogar</Text>
+
+        <View style={styles.stepBox}>
+          <Image
+            source={require('../../assets/tutorial1.jpeg')} // substitua pela sua imagem real
+            style={styles.stepImage}
+          />
+          <Text style={styles.stepText}>
+            1️⃣ Entre em nosso site e coloque seu nome
+          </Text>
+        </View>
+
+        <View style={styles.stepBox}>
+          <Image
+            source={require('../../assets/tutorial2.jpeg')}
+            style={styles.stepImage}
+          />
+          <Text style={styles.stepText}>
+            2️⃣ Escolha uma matéria para praticar
+          </Text>
+        </View>
+
+        <View style={styles.stepBox}>
+          <Image
+            source={require('../../assets/tutorial3.jpeg')}
+            style={styles.stepImage}
+          />
+          <Text style={styles.stepText}>
+            3️⃣ Agora jogue e aprenda!
+          </Text>
+        </View>
+
         {/* Botão Saiba Mais */}
         <Pressable
           style={styles.button}
@@ -133,6 +168,38 @@ const styles = StyleSheet.create({
   },
   text: { fontSize: 16, color: '#333', textAlign: 'justify', lineHeight: 22 },
   middleImage: { width: '90%', height: 180, resizeMode: 'cover', marginVertical: 15, borderRadius: 15 },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#ffd700',
+    marginVertical: 20,
+    textAlign: 'center',
+  },
+  stepBox: {
+    backgroundColor: 'rgba(255, 241, 214, 0.95)',
+    padding: 15,
+    borderRadius: 15,
+    marginVertical: 10,
+    width: '90%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  stepImage: {
+    width: '90%',
+    height: 150,
+    resizeMode: 'cover',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  stepText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
   button: {
     marginTop: 15,
     backgroundColor: '#6a5acd',
