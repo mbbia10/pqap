@@ -9,7 +9,7 @@ import MarromScreen from './screens/MarromScreen';
 import QuizScreen from './screens/QuizScreen'; 
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
-
+import HistoryScreen from './screens/HistoryScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -24,6 +24,8 @@ export default function AppNavigator() {
       <Stack.Screen name="QuizScreen" component={QuizScreen} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="SignupScreen" component={SignupScreen} />
+      <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+
     </Stack.Navigator>
   );
 }

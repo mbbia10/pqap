@@ -135,7 +135,14 @@ export default function QuizScreen({ navigation, route }) {
     try {
       const allScores = JSON.parse(await AsyncStorage.getItem('scores')) || {};
       if (!allScores[user]) allScores[user] = [];
-      allScores[user].push(score);
+
+      // salvar pontuação com data
+      allScores[user].push({
+        score,
+        maxCombo,
+        date: new Date().toISOString(),
+      });
+
       await AsyncStorage.setItem('scores', JSON.stringify(allScores));
     } catch (e) {
       console.log('Erro ao salvar pontuação', e);
@@ -186,6 +193,13 @@ export default function QuizScreen({ navigation, route }) {
             
             <Pressable 
               style={styles.homeButton}
+              onPress={() => navigation.navigate('HistoryScreen', { user })}
+            >
+              <Text style={styles.homeButtonText}>📊 Ver Histórico</Text>
+            </Pressable>
+
+            <Pressable 
+              style={[styles.homeButton, styles.secondaryButton]}
               onPress={() => navigation.goBack()}
             >
               <Text style={styles.homeButtonText}>🏠 Voltar ao Início</Text>
@@ -239,7 +253,7 @@ export default function QuizScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* 🔹 SEÇÃO PRINCIPAL COM PERGUNTAS E OPÇÕES (ADICIONADA) */}
+        {/* 🔹 SEÇÃO PRINCIPAL COM PERGUNTAS E OPÇÕES */}
         <Animated.View 
           style={[styles.content, { transform: [{ translateX: shakeAnim }] }]}
         >
@@ -298,7 +312,7 @@ const styles = StyleSheet.create({
   timerText: { color: '#ffd700', marginLeft: 4, fontWeight: 'bold' },
   timerCritical: { color: '#ff4444' },
   
-  // 🔹 NOVOS ESTILOS ADICIONADOS
+  // 🔹 Estilos do conteúdo principal
   content: { 
     flex: 1, 
     justifyContent: 'center', 
@@ -380,7 +394,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
-    marginTop: 20,
+    marginTop: 15,
+    minWidth: 200,
+    alignItems: 'center',
+  },
+  secondaryButton: {
+    backgroundColor: '#6a5acd',
   },
   homeButtonText: {
     color: '#fff',
