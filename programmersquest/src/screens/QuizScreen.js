@@ -8,6 +8,7 @@ import {
   Dimensions,
   Easing,
   Vibration,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +16,184 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
+
+// 🔹 IA - Gerador de Perguntas Automático
+class QuizAI {
+  constructor() {
+    this.usedQuestions = new Set();
+    this.questionTemplates = [
+      {
+        topic: 'Variáveis',
+        templates: [
+          {
+            question: '📦 O que é uma variável em programação?',
+            options: ['Uma caixa que guarda dados', 'Um tipo de loop', 'Um erro no código', 'Um comando de impressão'],
+            answer: 0,
+            hint: 'Pense em como guardamos informações para usar depois!'
+          },
+          {
+            question: '🎯 Para que usamos variáveis?',
+            options: ['Guardar valores para reutilizar', 'Criar animações', 'Conectar à internet', 'Fazer cálculos matemáticos apenas'],
+            answer: 0,
+            hint: 'Elas armazenam dados temporariamente!'
+          }
+        ]
+      },
+      {
+        topic: 'Loops',
+        templates: [
+          {
+            question: '🔄 O que é um loop em programação?',
+            options: ['Repetir ações automaticamente', 'Um tipo de variável', 'Um erro comum', 'Uma função matemática'],
+            answer: 0,
+            hint: 'Pense em fazer a mesma tarefa várias vezes!'
+          },
+          {
+            question: '🌀 Quando usamos loops?',
+            options: ['Para repetir tarefas', 'Para declarar variáveis', 'Para fazer comentários', 'Para conectar bancos de dados'],
+            answer: 0,
+            hint: 'Quando precisamos executar o mesmo código múltiplas vezes!'
+          }
+        ]
+      },
+      {
+        topic: 'Condições',
+        templates: [
+          {
+            question: '🎯 O que são condições (if/else)?',
+            options: ['Tomar decisões no código', 'Repetir ações', 'Armazenar dados', 'Criar funções'],
+            answer: 0,
+            hint: 'Pense em "SE isso ENTÃO aquilo"!'
+          },
+          {
+            question: '🤔 Quando usamos condições if/else?',
+            options: ['Para tomar decisões baseadas em condições', 'Para repetir código', 'Para organizar variáveis', 'Para fazer cálculos'],
+            answer: 0,
+            hint: 'Quando o programa precisa escolher entre diferentes caminhos!'
+          }
+        ]
+      },
+      {
+        topic: 'Funções',
+        templates: [
+          {
+            question: '📦 O que é uma função em programação?',
+            options: ['Um bloco de código reutilizável', 'Um tipo de variável', 'Um erro no programa', 'Um comando de loop'],
+            answer: 0,
+            hint: 'Pense em uma receita que pode ser usada várias vezes!'
+          },
+          {
+            question: '🚀 Por que usamos funções?',
+            options: ['Para organizar e reutilizar código', 'Para criar variáveis', 'Para fazer o programa rodar mais rápido', 'Para conectar à internet'],
+            answer: 0,
+            hint: 'Elas evitam repetição de código!'
+          }
+        ]
+      },
+      {
+        topic: 'Arrays',
+        templates: [
+          {
+            question: '📚 O que é um array?',
+            options: ['Uma lista de valores', 'Um tipo de loop', 'Uma função matemática', 'Um comando condicional'],
+            answer: 0,
+            hint: 'Pense em uma lista de compras!'
+          },
+          {
+            question: '🎯 Para que usamos arrays?',
+            options: ['Guardar múltiplos valores relacionados', 'Fazer cálculos complexos', 'Criar interfaces gráficas', 'Conectar bancos de dados'],
+            answer: 0,
+            hint: 'Útil para guardar grupos de dados similares!'
+          }
+        ]
+      }
+    ];
+  }
+
+  // Gerar pergunta única baseada no histórico
+  generateQuestion() {
+    let availableTemplates = [];
+    
+    // Coletar todos os templates disponíveis
+    this.questionTemplates.forEach(topic => {
+      topic.templates.forEach(template => {
+        const questionKey = template.question;
+        if (!this.usedQuestions.has(questionKey)) {
+          availableTemplates.push({
+            ...template,
+            topic: topic.topic
+          });
+        }
+      });
+    });
+
+    // Se não há mais perguntas disponíveis, reiniciar o histórico
+    if (availableTemplates.length === 0) {
+      this.usedQuestions.clear();
+      return this.generateQuestion(); // Recursão para gerar nova pergunta
+    }
+
+    // Escolher template aleatório
+    const randomTemplate = availableTemplates[Math.floor(Math.random() * availableTemplates.length)];
+    
+    // Gerar variações únicas
+    const variations = this.generateVariations(randomTemplate);
+    const selectedVariation = variations[Math.floor(Math.random() * variations.length)];
+
+    // Marcar como usada
+    this.usedQuestions.add(randomTemplate.question);
+
+    return {
+      ...selectedVariation,
+      topic: randomTemplate.topic,
+      id: Date.now() + Math.random() // ID único
+    };
+  }
+
+  // Gerar variações da mesma pergunta
+  generateVariations(template) {
+    const variations = [template]; // Incluir a original
+    
+    // Variação 1: Diferentes opções (mantendo a resposta correta)
+    if (template.options.length >= 4) {
+      const newOptions = [...template.options];
+      // Embaralhar opções (mantendo track da resposta correta)
+      for (let i = newOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newOptions[i], newOptions[j]] = [newOptions[j], newOptions[i]];
+      }
+      const newAnswer = newOptions.indexOf(template.options[template.answer]);
+      
+      variations.push({
+        ...template,
+        question: template.question + ' 🎲', // Adicionar emoji para indicar variação
+        options: newOptions,
+        answer: newAnswer
+      });
+    }
+
+    // Variação 2: Diferente formulação (para templates específicos)
+    if (template.topic === 'Variáveis') {
+      variations.push({
+        question: '💾 Em programação, o que é uma variável?',
+        options: ['Um local para armazenar dados', 'Um tipo de loop', 'Um método de impressão', 'Um comando condicional'],
+        answer: 0,
+        hint: 'É como uma gaveta que guarda informações!'
+      });
+    }
+
+    return variations;
+  }
+
+  // Gerar múltiplas perguntas únicas
+  generateUniqueQuestions(count) {
+    const questions = [];
+    for (let i = 0; i < count; i++) {
+      questions.push(this.generateQuestion());
+    }
+    return questions;
+  }
+}
 
 export default function QuizScreen({ navigation, route }) {
   const { user } = route.params;
@@ -34,38 +213,31 @@ export default function QuizScreen({ navigation, route }) {
   const [timeLeft, setTimeLeft] = useState(15);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [quizAI] = useState(new QuizAI());
+  const [questionsCount] = useState(10); // Número de perguntas por quiz
 
-  // 🔹 Perguntas
-  const questions = [
-    {
-      question: '🧙‍♂️ O que é programação?',
-      options: ['Dar comandos para computadores', 'Fazer café', 'Desenhar gráficos', 'Navegar na internet'],
-      answer: 0,
-      hint: 'É como ensinar um robô a realizar tarefas!',
-    },
-    {
-      question: '⚛️ Qual linguagem é usada no React Native?',
-      options: ['Python', 'JavaScript', 'C++', 'HTML'],
-      answer: 1,
-      hint: 'A mesma linguagem usada em websites interativos!',
-    },
-    {
-      question: '🎮 O que é gamificação?',
-      options: ['Transformar aprendizado em jogo', 'Jogar videogame', 'Escrever livros', 'Criar planilhas'],
-      answer: 0,
-      hint: 'Tornar atividades mais divertidas como um jogo!',
-    },
-    {
-      question: '🔧 O que é um componente em React?',
-      options: ['Peça de computador', 'Bloco de construção reutilizável', 'Tipo de variável', 'Função matemática'],
-      answer: 1,
-      hint: 'São como peças de Lego que formam a interface!',
-    },
-  ];
+  // 🔹 Inicializar perguntas
+  useEffect(() => {
+    generateNewQuiz();
+  }, []);
+
+  const generateNewQuiz = () => {
+    const newQuestions = quizAI.generateUniqueQuestions(questionsCount);
+    setQuestions(newQuestions);
+    setCurrent(0);
+    setScore(0);
+    setShowResult(false);
+    setSelectedOption(null);
+    setIsCorrect(null);
+    setTimeLeft(15);
+    setCombo(0);
+    setMaxCombo(0);
+  };
 
   // 🔹 Timer
   useEffect(() => {
-    if (showResult || timeLeft <= 0) return;
+    if (showResult || timeLeft <= 0 || questions.length === 0) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -76,7 +248,7 @@ export default function QuizScreen({ navigation, route }) {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, showResult]);
+  }, [timeLeft, showResult, questions]);
 
   const handleTimeUp = () => {
     Vibration.vibrate(200);
@@ -85,6 +257,8 @@ export default function QuizScreen({ navigation, route }) {
 
   // 🔹 Animações
   useEffect(() => {
+    if (questions.length === 0) return;
+
     Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, { toValue: -10, duration: 1500, useNativeDriver: true, easing: Easing.inOut(Easing.ease) }),
@@ -101,7 +275,7 @@ export default function QuizScreen({ navigation, route }) {
     setTimeLeft(15);
     setSelectedOption(null);
     setIsCorrect(null);
-  }, [current]);
+  }, [current, questions]);
 
   const shake = () => {
     Animated.sequence([
@@ -112,7 +286,7 @@ export default function QuizScreen({ navigation, route }) {
   };
 
   const handleAnswer = (index) => {
-    if (selectedOption !== null) return;
+    if (selectedOption !== null || questions.length === 0) return;
     setSelectedOption(index);
     const correct = index === questions[current].answer;
     setIsCorrect(correct);
@@ -136,11 +310,12 @@ export default function QuizScreen({ navigation, route }) {
       const allScores = JSON.parse(await AsyncStorage.getItem('scores')) || {};
       if (!allScores[user]) allScores[user] = [];
 
-      // salvar pontuação com data
       allScores[user].push({
         score,
+        total: questions.length,
         maxCombo,
         date: new Date().toISOString(),
+        percentage: Math.round((score / questions.length) * 100)
       });
 
       await AsyncStorage.setItem('scores', JSON.stringify(allScores));
@@ -160,7 +335,7 @@ export default function QuizScreen({ navigation, route }) {
   };
 
   const getOptionStyle = (index) => {
-    if (selectedOption === null) return styles.optionButton;
+    if (selectedOption === null || questions.length === 0) return styles.optionButton;
     if (index === questions[current].answer) return [styles.optionButton, styles.correctOption];
     if (index === selectedOption && !isCorrect) return [styles.optionButton, styles.wrongOption];
     return [styles.optionButton, styles.disabledOption];
@@ -189,21 +364,49 @@ export default function QuizScreen({ navigation, route }) {
           <View style={styles.resultContainer}>
             <Text style={styles.resultTitle}>🎉 Quiz Concluído!</Text>
             <Text style={styles.resultScore}>Pontuação: {score}/{questions.length}</Text>
+            <Text style={styles.resultPercentage}>
+              ({Math.round((score / questions.length) * 100)}%)
+            </Text>
             <Text style={styles.resultCombo}>Combo Máximo: {maxCombo}x</Text>
             
             <Pressable 
               style={styles.homeButton}
-              onPress={() => navigation.navigate('HistoryScreen', { user })}
+              onPress={generateNewQuiz}
             >
-              <Text style={styles.homeButtonText}>📊 Ver Histórico</Text>
+              <Ionicons name="refresh" size={20} color="#fff" />
+              <Text style={styles.homeButtonText}>🔄 Novo Quiz</Text>
             </Pressable>
 
             <Pressable 
               style={[styles.homeButton, styles.secondaryButton]}
+              onPress={() => navigation.navigate('HistoryScreen', { user })}
+            >
+              <Ionicons name="stats-chart" size={20} color="#fff" />
+              <Text style={styles.homeButtonText}>📊 Ver Histórico</Text>
+            </Pressable>
+
+            <Pressable 
+              style={[styles.homeButton, styles.tertiaryButton]}
               onPress={() => navigation.goBack()}
             >
+              <Ionicons name="home" size={20} color="#fff" />
               <Text style={styles.homeButtonText}>🏠 Voltar ao Início</Text>
             </Pressable>
+          </View>
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  // 🔹 Tela de carregamento
+  if (questions.length === 0) {
+    return (
+      <View style={styles.container}>
+        <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.gradient}>
+          <View style={styles.loadingContainer}>
+            <Ionicons name="construct" size={60} color="#ffd700" />
+            <Text style={styles.loadingText}>Gerando perguntas únicas...</Text>
+            <Text style={styles.loadingSubtext}>Preparando seu quiz personalizado! 🚀</Text>
           </View>
         </LinearGradient>
       </View>
@@ -257,6 +460,10 @@ export default function QuizScreen({ navigation, route }) {
         <Animated.View 
           style={[styles.content, { transform: [{ translateX: shakeAnim }] }]}
         >
+          <View style={styles.topicBadge}>
+            <Text style={styles.topicText}>{questions[current].topic}</Text>
+          </View>
+
           <Text style={styles.questionText}>
             {questions[current].question}
           </Text>
@@ -320,6 +527,18 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 50 
   },
+  topicBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderRadius: 15,
+    marginBottom: 15,
+  },
+  topicText: {
+    color: '#ffd700',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   questionText: {
     color: '#fff',
     fontSize: 24,
@@ -382,7 +601,13 @@ const styles = StyleSheet.create({
   resultScore: {
     color: '#00e676',
     fontSize: 24,
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+  resultPercentage: {
+    color: '#00e676',
+    fontSize: 18,
+    marginBottom: 15,
+    opacity: 0.8,
   },
   resultCombo: {
     color: '#ffd700',
@@ -390,20 +615,47 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   homeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#3949ab',
-    paddingHorizontal: 30,
+    paddingHorizontal: 25,
     paddingVertical: 15,
     borderRadius: 25,
-    marginTop: 15,
+    marginTop: 12,
     minWidth: 200,
-    alignItems: 'center',
+    justifyContent: 'center',
   },
   secondaryButton: {
     backgroundColor: '#6a5acd',
   },
+  tertiaryButton: {
+    backgroundColor: '#ff6f61',
+  },
   homeButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginLeft: 8,
+  },
+
+  // 🔹 Estilos de carregamento
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  loadingSubtext: {
+    color: '#ffd700',
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });

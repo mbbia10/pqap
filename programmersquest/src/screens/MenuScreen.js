@@ -44,7 +44,7 @@ export default function MenuScreen({ navigation, route }) {
       screen: 'Verde',
     },
     {
-      title: "Como surgiu o Programmer's Quest",
+      title: "teoria",
       color: '#8B4513',
       icon: 'flame',
       screen: 'Marrom',
