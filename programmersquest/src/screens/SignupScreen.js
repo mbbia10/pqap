@@ -1,8 +1,8 @@
 // src/screens/SignupScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, TextInput, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { supabase } from '../supabase';
 
 export default function SignupScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -10,26 +10,23 @@ export default function SignupScreen({ navigation }) {
   const [confirm, setConfirm] = useState('');
 
   const handleSignup = async () => {
-    if (!username || !password) {
-      Alert.alert('Preencha todos os campos');
-      return;
-    }
-    if (password !== confirm) {
-      Alert.alert('As senhas não coincidem');
-      return;
-    }
+    if (!username || !password) return Alert.alert('Preencha todos os campos');
+    if (password !== confirm) return Alert.alert('Senhas não coincidem');
 
-    // Salvar usuário no AsyncStorage
-    const users = JSON.parse(await AsyncStorage.getItem('users')) || [];
-    const userExists = users.find(u => u.username === username);
+    const { data: existing } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .single();
 
-    if (userExists) {
-      Alert.alert('Usuário já existe!');
-      return;
-    }
+    if (existing) return Alert.alert('Usuário já existe!');
 
-    users.push({ username, password });
-    await AsyncStorage.setItem('users', JSON.stringify(users));
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{ username, password }]);
+
+    if (error) return Alert.alert('Erro ao criar usuário', error.message);
+
     Alert.alert('Conta criada com sucesso!');
     navigation.navigate('LoginScreen');
   };
@@ -38,29 +35,9 @@ export default function SignupScreen({ navigation }) {
     <LinearGradient colors={['#0f0c29', '#302b63', '#240046']} style={styles.container}>
       <Text style={styles.title}>Criar Conta</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Usuário"
-        placeholderTextColor="#ccc"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        placeholderTextColor="#ccc"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirme a senha"
-        placeholderTextColor="#ccc"
-        secureTextEntry
-        value={confirm}
-        onChangeText={setConfirm}
-      />
+      <TextInput style={styles.input} placeholder="Usuário" placeholderTextColor="#ccc" value={username} onChangeText={setUsername} />
+      <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#ccc" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput style={styles.input} placeholder="Confirme a senha" placeholderTextColor="#ccc" secureTextEntry value={confirm} onChangeText={setConfirm} />
 
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Cadastrar</Text>

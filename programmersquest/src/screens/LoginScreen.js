@@ -1,63 +1,46 @@
 // src/screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, TextInput, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { supabase } from '../supabase';
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert('Preencha todos os campos');
-      return;
-    }
+    if (!username || !password) return Alert.alert('Preencha todos os campos');
 
-    const users = JSON.parse(await AsyncStorage.getItem('users')) || [];
-    const user = users.find(u => u.username === username && u.password === password);
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .single();
 
-    if (!user) {
-      Alert.alert('Usuário ou senha inválidos!');
-      return;
-    }
+    if (error || !user) return Alert.alert('Usuário ou senha incorretos');
 
-    // Login ok → ir para MenuScreen
-    navigation.navigate('Menu', { user: username });
+    // Passar usuário completo para QuizScreen
+    navigation.navigate('Menu', { user });
+
   };
 
   return (
     <LinearGradient colors={['#0f0c29', '#302b63', '#240046']} style={styles.container}>
       <Text style={styles.title}>Login</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Usuário"
-        placeholderTextColor="#ccc"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        placeholderTextColor="#ccc"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
+      <TextInput style={styles.input} placeholder="Usuário" placeholderTextColor="#ccc" value={username} onChangeText={setUsername} />
+      <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#ccc" secureTextEntry value={password} onChangeText={setPassword} />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
-
       <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
-        <Text style={styles.linkText}>Não tem conta? Crie agora</Text>
+        <Text style={styles.linkText}>Criar conta</Text>
       </TouchableOpacity>
     </LinearGradient>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ 
   container: { flex:1, justifyContent:'center', alignItems:'center', padding:20 },
   title: { color:'#fff', fontSize:24, fontWeight:'bold', marginBottom:30 },
   input: { width:'80%', padding:15, borderWidth:1, borderColor:'#fff', borderRadius:10, marginVertical:10, color:'#fff' },

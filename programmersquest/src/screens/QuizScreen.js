@@ -14,6 +14,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../supabase';
+
 
 const { width } = Dimensions.get('window');
 
@@ -306,23 +308,20 @@ export default function QuizScreen({ navigation, route }) {
   };
 
   const saveScore = async () => {
-    try {
-      const allScores = JSON.parse(await AsyncStorage.getItem('scores')) || {};
-      if (!allScores[user]) allScores[user] = [];
-
-      allScores[user].push({
+  try {
+    const { data, error } = await supabase
+      .from('scores')
+      .insert([{
+        user_id: user.id,    // user.id do objeto enviado pelo LoginScreen
         score,
-        total: questions.length,
-        maxCombo,
-        date: new Date().toISOString(),
-        percentage: Math.round((score / questions.length) * 100)
-      });
-
-      await AsyncStorage.setItem('scores', JSON.stringify(allScores));
-    } catch (e) {
-      console.log('Erro ao salvar pontuação', e);
-    }
-  };
+        max_combo: maxCombo,
+        total_questions: questions.length
+      }]);
+    if (error) console.log('Erro ao salvar pontuação', error.message);
+  } catch (e) {
+    console.log('Erro ao salvar pontuação', e);
+  }
+};
 
   const nextQuestion = () => {
     if (current + 1 < questions.length) {

@@ -1,7 +1,8 @@
+// src/screens/HistoryScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { supabase } from '../supabase';
 
 export default function HistoryScreen({ route }) {
   const { user } = route.params;
@@ -9,38 +10,40 @@ export default function HistoryScreen({ route }) {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const allScores = JSON.parse(await AsyncStorage.getItem('scores')) || {};
-      const userScores = allScores[user] || [];
-      // ordenar do mais recente para o mais antigo
-      userScores.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setHistory(userScores);
+      const { data, error } = await supabase
+        .from('scores')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      setHistory(data);
     };
+
     loadHistory();
   }, []);
 
-  const renderItem = ({ item, index }) => {
-    const prevScore = index < history.length - 1 ? history[index + 1].score : null;
-    const evolution = prevScore !== null ? (item.score > prevScore ? 'Subiu 👍' : item.score < prevScore ? 'Caiu 👎' : 'Igual 😐') : '—';
-
-    return (
-      <View style={styles.card}>
-        <Text style={styles.date}>{new Date(item.date).toLocaleString()}</Text>
-        <Text style={styles.score}>Pontuação: {item.score}</Text>
-        <Text style={styles.combo}>Combo Máximo: {item.maxCombo}x</Text>
-        <Text style={styles.evolution}>Evolução: {evolution}</Text>
-      </View>
-    );
-  };
+  const renderItem = ({ item, index }) => (
+    <View style={styles.card}>
+      <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
+      <Text style={styles.score}>Pontuação: {item.score}/{item.total_questions}</Text>
+      <Text style={styles.combo}>Combo Máximo: {item.max_combo}x</Text>
+    </View>
+  );
 
   return (
     <LinearGradient colors={['#0f0c29', '#302b63', '#240046']} style={styles.container}>
-      <Text style={styles.title}>Histórico de {user}</Text>
+      <Text style={styles.title}>Histórico de {user.username}</Text>
       {history.length === 0 ? (
         <Text style={styles.noData}>Nenhuma partida jogada ainda!</Text>
       ) : (
         <FlatList
           data={history}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 50 }}
         />
@@ -56,6 +59,5 @@ const styles = StyleSheet.create({
   card: { backgroundColor: 'rgba(255,255,255,0.1)', padding: 15, borderRadius: 15, marginBottom: 15 },
   date: { color: '#ffd700', fontWeight: '600', marginBottom: 5 },
   score: { color: '#00e676', fontSize: 18, marginBottom: 5 },
-  combo: { color: '#ff8c00', fontSize: 16, marginBottom: 5 },
-  evolution: { color: '#32cd32', fontWeight: '600' },
+  combo: { color: '#ff8c00', fontSize: 16, marginBottom: 5 }
 });
