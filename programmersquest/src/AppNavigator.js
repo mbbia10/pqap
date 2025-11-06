@@ -7,6 +7,9 @@ import BegeScreen from './screens/BegeScreen';
 import VerdeScreen from './screens/VerdeScreen';
 import MarromScreen from './screens/MarromScreen';
 import QuizScreen from './screens/QuizScreen'; 
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -19,6 +22,8 @@ export default function AppNavigator() {
       <Stack.Screen name="Verde" component={VerdeScreen} />
       <Stack.Screen name="Marrom" component={MarromScreen} />
       <Stack.Screen name="QuizScreen" component={QuizScreen} />
+      <Stack.Screen name="LoginScreen" component={LoginScreen} />
+      <Stack.Screen name="SignupScreen" component={SignupScreen} />
     </Stack.Navigator>
   );
 }
