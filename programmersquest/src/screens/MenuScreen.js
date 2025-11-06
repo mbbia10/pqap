@@ -3,14 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   Animated,
   Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function MenuScreen({ navigation }) {
+export default function MenuScreen({ navigation, route }) {
+  const user = route?.params?.user ?? null;
   const floatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -51,6 +51,14 @@ export default function MenuScreen({ navigation }) {
     },
   ];
 
+  const handleNavigation = (btn) => {
+    if (btn.screen === 'Verde') {
+      navigation.navigate(btn.screen, { user });
+    } else {
+      navigation.navigate(btn.screen);
+    }
+  };
+
   return (
     <LinearGradient
       colors={['#0f0c29', '#302b63', '#240046']}
@@ -69,7 +77,7 @@ export default function MenuScreen({ navigation }) {
               styles.card,
               { backgroundColor: btn.color, opacity: pressed ? 0.9 : 1 },
             ]}
-            onPress={() => navigation.navigate(btn.screen)}
+            onPress={() => handleNavigation(btn)}
           >
             <Ionicons name={btn.icon} size={26} color="#fff" />
             <Text style={styles.text}>{btn.title}</Text>
