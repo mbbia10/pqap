@@ -1,3 +1,4 @@
+// src/screens/MenuScreen.js
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -14,6 +15,18 @@ import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
+// Mesma lista de avatares do ProfileScreen
+const AVATAR_OPTIONS = [
+  { id: 1, icon: 'person', name: '👤', color: '#667eea' },
+  { id: 2, icon: 'rocket', name: '🚀', color: '#ff6b6b' },
+  { id: 3, icon: 'game-controller', name: '🎮', color: '#4ecdc4' },
+  { id: 4, icon: 'code-slash', name: '💻', color: '#f5576c' },
+  { id: 5, icon: 'star', name: '⭐', color: '#ffd93d' },
+  { id: 6, icon: 'planet', name: '🪐', color: '#9b59b6' },
+  { id: 7, icon: 'shield', name: '🛡️', color: '#3498db' },
+  { id: 8, icon: 'diamond', name: '💎', color: '#1abc9c' },
+];
+
 export default function MenuScreen({ navigation, route }) {
   const user = route?.params?.user ?? null;
   const floatAnim = useRef(new Animated.Value(0)).current;
@@ -21,6 +34,14 @@ export default function MenuScreen({ navigation, route }) {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const sidebarAnim = useRef(new Animated.Value(-300)).current;
+
+  // Função para pegar o avatar do usuário
+  const getUserAvatar = () => {
+    if (!user?.avatar) return AVATAR_OPTIONS[0]; // Avatar padrão
+    return AVATAR_OPTIONS.find(avatar => avatar.id === user.avatar) || AVATAR_OPTIONS[0];
+  };
+
+  const currentAvatar = getUserAvatar();
 
   useEffect(() => {
     // Animação de flutuação do mago
@@ -54,6 +75,7 @@ export default function MenuScreen({ navigation, route }) {
     ]).start();
   }, [floatAnim]);
 
+  // Função para abrir/fechar o menu lateral
   const toggleSidebar = () => {
     if (sidebarVisible) {
       Animated.timing(sidebarAnim, {
@@ -147,7 +169,7 @@ export default function MenuScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Conteúdo principal - MANTIDO ORIGINAL */}
+        {/* Conteúdo principal */}
         <View style={styles.content}>
           {/* Elementos decorativos */}
           <View style={styles.decorationCircle1} />
@@ -255,9 +277,17 @@ export default function MenuScreen({ navigation, route }) {
           colors={['#1a1a2e', '#16213e', '#0f0c29']}
           style={styles.sidebarGradient}
         >
-          {/* Header do Sidebar */}
+          {/* Header do Sidebar com Avatar */}
           <View style={styles.sidebarHeader}>
-            <Text style={styles.sidebarTitle}>Menu</Text>
+            <View style={styles.userInfo}>
+              <View style={[styles.avatarContainer, { backgroundColor: currentAvatar.color }]}>
+                <Text style={styles.avatarText}>{currentAvatar.name}</Text>
+              </View>
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>{user?.username || 'Usuário'}</Text>
+                <Text style={styles.userStatus}>Online 🟢</Text>
+              </View>
+            </View>
             <TouchableOpacity 
               style={styles.closeButton}
               onPress={toggleSidebar}
@@ -428,7 +458,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
-    width: 280,
+    width: 300,
     zIndex: 100,
   },
   sidebarGradient: {
@@ -438,19 +468,44 @@ const styles = StyleSheet.create({
   sidebarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  sidebarTitle: {
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  avatarText: {
+    fontSize: 24,
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userName: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  userStatus: {
+    color: '#94a3b8',
+    fontSize: 12,
   },
   closeButton: {
     padding: 5,
+    marginTop: -5,
   },
   menuOptions: {
     padding: 20,
