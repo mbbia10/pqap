@@ -5,49 +5,73 @@ import {
   StyleSheet,
   Animated,
   Pressable,
+  Dimensions,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
+const { width, height } = Dimensions.get('window');
+
 export default function MenuScreen({ navigation, route }) {
   const user = route?.params?.user ?? null;
   const floatAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
+    // Animação de flutuação do mago
     Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, {
-          toValue: -10,
+          toValue: -15,
           duration: 2000,
           useNativeDriver: true,
         }),
         Animated.timing(floatAnim, {
-          toValue: 10,
+          toValue: 0,
           duration: 2000,
           useNativeDriver: true,
         }),
       ])
     ).start();
+
+    // Animação de entrada
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      })
+    ]).start();
   }, [floatAnim]);
 
   const buttons = [
     {
       title: 'O que é programação e por que ela é importante',
-      color: '#f4a460',
+      colors: ['#667eea', '#764ba2'],
       icon: 'code-slash',
       screen: 'Bege',
+      emoji: '💻'
     },
     {
       title: 'Gamificação e jogos educacionais',
-      color: '#4caf50',
+      colors: ['#11998e', '#38ef7d'],
       icon: 'game-controller',
       screen: 'Verde',
+      emoji: '🎮'
     },
     {
-      title: "teoria",
-      color: '#8B4513',
+      title: 'Teoria da Aprendizagem',
+      colors: ['#f5576c', '#f093fb'],
       icon: 'flame',
       screen: 'Marrom',
+      emoji: '📚'
     },
   ];
 
@@ -61,29 +85,94 @@ export default function MenuScreen({ navigation, route }) {
 
   return (
     <LinearGradient
-      colors={['#0f0c29', '#302b63', '#240046']}
+      colors={['#0f0c29', '#1a1a2e', '#16213e']}
       style={styles.container}
     >
+      {/* Elementos decorativos */}
+      <View style={styles.decorationCircle1} />
+      <View style={styles.decorationCircle2} />
+      
+      {/* Header com boas-vindas */}
+      <Animated.View style={[
+        styles.header,
+        { 
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }
+      ]}>
+        <Text style={styles.welcomeText}>
+          {user ? `Bem-vindo, ${user.username}!` : 'Bem-vindo!'}
+        </Text>
+        <Text style={styles.subtitle}>Escolha sua jornada de aprendizado</Text>
+      </Animated.View>
+
+      {/* Mago animado - USANDO A IMAGEM ORIGINAL */}
       <Animated.Image
         source={require('../../assets/wizard.png')}
-        style={[styles.wizard, { transform: [{ translateY: floatAnim }] }]}
+        style={[
+          styles.wizard,
+          { transform: [{ translateY: floatAnim }] }
+        ]}
       />
 
-      <View style={styles.cardsContainer}>
+      {/* Cards animados */}
+      <Animated.View style={[
+        styles.cardsContainer,
+        { 
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }
+      ]}>
         {buttons.map((btn, index) => (
-          <Pressable
+          <Animated.View
             key={index}
-            style={({ pressed }) => [
-              styles.card,
-              { backgroundColor: btn.color, opacity: pressed ? 0.9 : 1 },
+            style={[
+              styles.cardWrapper,
+              {
+                transform: [{
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  })
+                }]
+              }
             ]}
-            onPress={() => handleNavigation(btn)}
           >
-            <Ionicons name={btn.icon} size={26} color="#fff" />
-            <Text style={styles.text}>{btn.title}</Text>
-          </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.card,
+                { 
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                  shadowOpacity: pressed ? 0.3 : 0.5,
+                },
+              ]}
+              onPress={() => handleNavigation(btn)}
+            >
+              <LinearGradient
+                colors={btn.colors}
+                style={styles.gradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons name={btn.icon} size={28} color="#fff" />
+                    <Text style={styles.emoji}>{btn.emoji}</Text>
+                  </View>
+                  <Text style={styles.text}>{btn.title}</Text>
+                </View>
+              </LinearGradient>
+            </Pressable>
+          </Animated.View>
         ))}
-      </View>
+      </Animated.View>
+
+      {/* Footer */}
+      <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
+        <Text style={styles.footerText}>
+          Sua aventura no conhecimento começa aqui! 🌟
+        </Text>
+      </Animated.View>
     </LinearGradient>
   );
 }
@@ -92,39 +181,102 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+  },
+  decorationCircle1: {
+    position: 'absolute',
+    top: -80,
+    right: -60,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+  },
+  decorationCircle2: {
+    position: 'absolute',
+    bottom: -60,
+    left: -50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(247, 87, 108, 0.1)',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  welcomeText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: '#cbd5e1',
+    fontSize: 16,
+    textAlign: 'center',
   },
   wizard: {
     width: 180,
     height: 180,
     resizeMode: 'contain',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   cardsContainer: {
-    width: '90%',
+    width: '100%',
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  cardWrapper: {
+    width: '100%',
+    marginBottom: 15,
   },
   card: {
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  gradient: {
+    borderRadius: 20,
+    padding: 20,
+  },
+  cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    borderRadius: 25,
-    marginVertical: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.6,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 10,
-    elevation: 10,
-    gap: 12,
+    justifyContent: 'flex-start',
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+    position: 'relative',
+  },
+  emoji: {
+    fontSize: 20,
+    marginLeft: 5,
   },
   text: {
     flex: 1,
     color: '#fff',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
+    textAlign: 'left',
+    lineHeight: 22,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#94a3b8',
+    fontSize: 14,
     textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
